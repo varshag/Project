@@ -4,11 +4,11 @@ import pybrain
 import numpy as np
 import matplotlib.pyplot as pyp
 import time
-#import trainRNN as tn
+import trainRNN as tn
 #NOTE: new/improved parsing/training not working embedded here, only stand-alone...
 print "Starting Mommy Brain Simulation"
-net = uf.rnnTrain()
-#net = tn.trainNet()
+#net = uf.rnnTrain()
+net = tn.trainNet()
 print "Network Loaded"
 
 ## Set global variables for initialization and checking
@@ -17,7 +17,7 @@ BABY_INITIAL_POSITION = [-8.595, 7.843, 7.813]
 REACH_THRESHOLD = 8
 GESTURE_THRESHOLD = 10
 
-p = win32pipe.CreateNamedPipe( r'\\.\pipe\MommyBrainPipe', 
+p = win32pipe.CreateNamedPipe( r'\\.\pipe\MommyBrainPipe',
 	win32pipe.PIPE_ACCESS_DUPLEX,
 	win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_WAIT,
 	1, 65536, 65536, 30000000, None )
@@ -29,10 +29,10 @@ simulationTime = 0
 motherWeights = np.array([1,1,1])
 ##
 numEpisodes = 0
-while(numEpisodes < 5):
+while(numEpisodes < 2):
     numEpisodes = numEpisodes + 1
     motherEpisodeStatus = 'TO_START'
-    runEpisode = 1       
+    runEpisode = 1
     flag = 1
     timer1 = 0
     timer2 = 0
@@ -75,7 +75,10 @@ while(numEpisodes < 5):
         elif(motherEpisodeStatus == 'INITIALIZED'):
             messageToSend = 'DO_NOTHING'
             motherEpisodeStatus = 'WATCHING'
-            
+            #
+            babyReachTarget = motherWrist
+            #
+
         elif(motherEpisodeStatus == 'WATCHING'):
             if(motherHead[0] - babyHead[0] > REACH_THRESHOLD): ###FIX
                 print "mother watching"
@@ -83,9 +86,10 @@ while(numEpisodes < 5):
                 timer1 = timer1 + 1
                 if(flag == 1):
                     correction = np.array([0,0,0]) - babyWrist
-                    #print "JUST ONCE"
+                    print "JUST ONCE"
                     flag = 0
-                else:                        
+                    baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
+                else:
                     filteredInput = uf.rnnFilter(babyWrist,correction)
                     rnnActivity = net.activate(filteredInput)
                     tanhRNN = np.tanh(rnnActivity)
@@ -95,21 +99,29 @@ while(numEpisodes < 5):
                     intActivity = tmp + intActivity
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
-                    
-            ## To tell mother when to respond        
-            if(timer1 < 40 and intActivity[0] < 40):
+                    print "intActivity"
+
+            ## To tell mother when to respond
+            #if(timer1 < 40 and intActivity[0] < 40)
+            if(timer1 < 50 and intActivity[0] < 50) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
+                print "DO_NOTHING -- if"
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'RESPOND'
                 #pyp.plot(intActivity)
                 #pyp.show()
+                print "DO_NOTHING -- else"
 
-        # imposes a reach 'response' for 20 ts, then waits to end        
+        # imposes a reach 'response' for 20 ts, then waits to end
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
+            print "respond"
             if(timer2 < 20):
-                messageToSend = 'MOVE_ARM' + ' ' + str(0) + ' ' + str(0) + ' ' + str(-2) + ' ' + str(simulationTime)
+                #
+                motherPullResponse = np.array(baWristInit - motherWrist)
+                messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
+                #
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
@@ -121,8 +133,8 @@ while(numEpisodes < 5):
                 runEpisode = 0
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
     if(numEpisodes < 5):
-            pyp.plot(rnnActivityAUX)
-            pyp.show()
+            #pyp.plot(rnnActivityAUX)
+            #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
             motherFile.close()
             #tmpMotherFile.close()
@@ -134,7 +146,7 @@ win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
 motherFile.close()
 #tmpMotherFile.close()
 
-pyp.plot(rnnActivityAUX)
-pyp.show()
+#pyp.plot(rnnActivityAUX)
+#pyp.show()
 
 win32file.CloseHandle(p)
