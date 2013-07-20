@@ -35,7 +35,7 @@ while(numEpisodes < 9):
     ##########
     ###tmpStr = 'babyTrajectory_Episode'+str(tmp)+'.txt'
     ###babyFile = open(tmpStr, 'w')
-    babyFile = open('babyTrajectory_Episode1.txt', 'w')
+    babyFile = open('babyTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
 
     ##
     while(runEpisode == 1):
@@ -125,10 +125,10 @@ while(numEpisodes < 9):
             babyFile.close()
 
 ##
-uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
-uf.writeReceivedCoordinatesToFile(babyFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
+#uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
+#uf.writeReceivedCoordinatesToFile(babyFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
-babyFile.close()
+#babyFile.close()
 
 win32file.CloseHandle(p)
 
