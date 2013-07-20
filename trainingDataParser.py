@@ -5,6 +5,7 @@ from pybrain.structure.networks import RecurrentNetwork
 from pybrain.datasets import SequentialDataSet
 from pybrain.structure.modules import LSTMLayer
 from pybrain.datasets.sequential import SequentialDataSet
+import pickle
 
 def rnnTrainAUX(data):
 
@@ -78,8 +79,7 @@ dummy1 = arr2[3:]
 
 # Dummy action 2
 arr3 = np.array([0.0,0.0,0.0])
-fileName = "trainer_babyTrajectory_Dummy2.txt"
-with open(fileName) as fileObj3:
+with open("trainer_babyTrajectory_Dummy2.txt") as fileObj3:
     for line3 in fileObj3:
             lineParse3 = line3.split()
             if(lineParse3[1] == "BABY_WRIST"):
@@ -98,3 +98,6 @@ input = rnnFilterAUX(data)
 
 net  = rnnTrainAUX(input)
 
+fileObject = open('netFile.txt','w')
+pickle.dump(net,fileObject)
+fileObject.close()

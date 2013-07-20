@@ -4,11 +4,14 @@ import pybrain
 import numpy as np
 import matplotlib.pyplot as pyp
 import time
-import trainRNN as tn
+import pickle
+#import trainRNN as tn
 #NOTE: new/improved parsing/training not working embedded here, only stand-alone...
 print "Starting Mommy Brain Simulation"
 #net = uf.rnnTrain()
-net = tn.trainNet()
+#net = tn.trainNet()
+fileObj = open('netFile.txt','r')
+net = pickle.load(fileObj)
 print "Network Loaded"
 
 ## Set global variables for initialization and checking
