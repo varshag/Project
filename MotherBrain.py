@@ -47,7 +47,7 @@ while(numEpisodes < 9):
     intActivity = np.array([0,0,0])
     ###tmpStr = 'motherTrajectory_Episode'+str(tmp)+'.txt'
     ###motherFile = open(tmpStr, 'w')
-    motherFile = open('motherTrajectory_Episode1.txt', 'w')
+    motherFile = open('motherTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
 
     ##
     while(runEpisode == 1):
@@ -153,10 +153,10 @@ while(numEpisodes < 9):
             #tmpMotherFile.close()
 
 ## End program / pipes
-uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
-uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
+#uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
+#uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
-motherFile.close()
+#motherFile.close()
 #tmpMotherFile.close()
 
 #pyp.plot(rnnActivityAUX)
