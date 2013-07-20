@@ -32,8 +32,9 @@ while(numEpisodes < 9):
     numEpisodes = numEpisodes + 1
     motherEpisodeStatus = 'TO_START'
     runEpisode = 1
-    flag = 1
     episodeTime = 0
+    motherRNNFlag = 1
+    motherIntFlag = 0
     ##
     ##########
     timer2 = 0
@@ -83,11 +84,12 @@ while(numEpisodes < 9):
         elif(motherEpisodeStatus == 'WATCHING'):
             print "MOTHER WATCHING"
             if(motherHead[0] - babyHead[0] > REACH_THRESHOLD):
+                # ^ change from 'crossing threshold' to 'moving arm and not walking'
                 print "MOTHER REACH_THRESHOLD"
             else:
-                if(flag == 1):
+                if(motherRNNFlag == 1):
                     correction = np.array([0,0,0]) - babyWrist
-                    flag = 0
+                    motherRNNFlag = 0
                     baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
                 else:
                     filteredInput = uf.rnnFilter(babyWrist,correction)
@@ -100,24 +102,28 @@ while(numEpisodes < 9):
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
             ## To tell mother when to respond
-            if(intActivity[0] < 8) and (babyReachTarget[0] - babyWrist[0] > 0.5):
+            if(intActivity[0] < 10) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'RESPOND'
                 #pyp.plot(intActivity)
                 #pyp.show()
+                if(intActivity[0] >= 10):
+                    motherIntFlag = 1
         ##########################
 
         ##########################
-        # mother response should be more flexible: arm shouldn't be pulled...
-        # if moving based on recognition -- should just 'walk' in that case
+        # change so if intActivity crosses theshold, different anim commands get sent
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
             print "MOTHER RESPOND"
             if(timer2 < 20):
-                motherPullResponse = np.array(baWristInit - motherWrist)
-                messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
+                if(motherIntFlag == 1):
+                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(-0.2) + ' ' + str(0) + ' ' + str(0)
+                else:
+                    motherPullResponse = np.array(baWristInit - motherWrist)
+                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
