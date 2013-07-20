@@ -97,9 +97,9 @@ while(numEpisodes < 9):
                     rnnActivity = net.activate(filteredInput)
                     tanhRNN = np.tanh(rnnActivity)
                     rnnActivityAUX = np.row_stack((rnnActivityAUX,tanhRNN))
-                    tmp = tanhRNN * motherWeights
-                    tmp = uf.compInt(tmp)
-                    intActivity = tmp + intActivity
+                    rawIntInput = tanhRNN * motherWeights
+                    compInput = uf.compInt(rawIntInput)
+                    intActivity = compInput + intActivity
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
             ## To tell mother when to respond

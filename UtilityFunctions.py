@@ -185,8 +185,11 @@ def motherLearnWeights(motherWeights):
 
 ## REPLACE WITH COMPETITION
 def compInt(input):
+    import numpy as np
+    s = float(input.sum())
     idx = input < input.max()
     input[idx] = 0
+    input = np.divide(input,s+1)
     return input
 
 def rnnTrainAUX(data):
