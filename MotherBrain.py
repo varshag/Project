@@ -36,7 +36,6 @@ while(numEpisodes < 9):
     episodeTime = 0
     ##
     ##########
-    timer1 = 0
     timer2 = 0
     timer3 = 0
     ##########
@@ -80,14 +79,12 @@ while(numEpisodes < 9):
             print "Mother INITIALIZED"
 
         ########################
-        # (i) is var timer1 obsolete?
-        # (ii) below 'if': but what about 'gesture_threshold'? need be more flexible
+        # (i) below 'if': but what about 'gesture_threshold'? need be more flexible
         elif(motherEpisodeStatus == 'WATCHING'):
             print "MOTHER WATCHING"
-            if(motherHead[0] - babyHead[0] > REACH_THRESHOLD): 
+            if(motherHead[0] - babyHead[0] > REACH_THRESHOLD):
                 print "MOTHER REACH_THRESHOLD"
             else:
-                timer1 = timer1 + 1
                 if(flag == 1):
                     correction = np.array([0,0,0]) - babyWrist
                     flag = 0
@@ -103,7 +100,7 @@ while(numEpisodes < 9):
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
             ## To tell mother when to respond
-            if(timer1 < 50 and intActivity[0] < 50) and (babyReachTarget[0] - babyWrist[0] > 0.5):
+            if(intActivity[0] < 8) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
             else:
                 messageToSend = 'DO_NOTHING'
@@ -125,7 +122,7 @@ while(numEpisodes < 9):
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
         ##########################
-                
+
         elif(motherEpisodeStatus == 'END'):
             print "MOTHER END"
             messageToSend = 'DO_NOTHING'
@@ -134,8 +131,8 @@ while(numEpisodes < 9):
                 runEpisode = 0
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
     if(numEpisodes < 9):
-            pyp.plot(rnnActivityAUX)
-            pyp.show()
+            #pyp.plot(rnnActivityAUX)
+            #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
             motherFile.close()
             #tmpMotherFile.close()

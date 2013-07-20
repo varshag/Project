@@ -30,7 +30,6 @@ while(numEpisodes < 9):
     flag = True
     episodeTime = 0
     ##########
-    timer1 = 0
     timer2 = 0
     timer3 = 0
     ##########
@@ -84,14 +83,12 @@ while(numEpisodes < 9):
 
         ######################
         # (i) should learn truncation
-        # (ii) var timer1 obsolete?
-        # (iii) does he effectively 'terminate' action if mother responds? (confirm)
-        # (iv) pullTarget / pullCount obsolete?
+        # (ii) does he effectively 'terminate' action if mother responds? (confirm)
+        # (iii) pullTarget / pullCount obsolete?
         elif(babyEpisodeStatus == 'REACH'):
             print "BABY REACH"
-            timer1 = timer1 + 1
             #reach until either make target, or timer1 greater than threshold (30), or mother responds
-            if(timer1 < 50 and flag == True) and (babyReachTarget[0] - babyWrist[0] > 0.5):
+            if(flag == True) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 babyWrist = np.array(babyWrist)
                 babyReachTarget = np.array(babyReachTarget)
                 babyReachCoords = np.array(babyReachTarget - babyWrist)
@@ -105,7 +102,7 @@ while(numEpisodes < 9):
                 pullTarget = 8
                 babyPullCount = 0
         ########################
-                
+
         elif(babyEpisodeStatus == 'RESET_ARM'):
             print "BABY RESET_ARM"
             timer2 = timer2 + 1
