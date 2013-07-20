@@ -2,12 +2,12 @@ import maya.cmds as cmds
 import operator
 import win32pipe, win32file, time
 ##
-mommyBrain = win32file.CreateFile( '\\\\.\\pipe\\MommyBrainPipe', 
+mommyBrain = win32file.CreateFile( '\\\\.\\pipe\\MommyBrainPipe',
 								win32file.GENERIC_READ | win32file.GENERIC_WRITE,
 								win32file.FILE_SHARE_READ, None,
 								win32file.OPEN_EXISTING,
 								0, None )
-babyBrain = win32file.CreateFile( '\\\\.\\pipe\\BabyBrainPipe', 
+babyBrain = win32file.CreateFile( '\\\\.\\pipe\\BabyBrainPipe',
 								win32file.GENERIC_READ | win32file.GENERIC_WRITE,
 								win32file.FILE_SHARE_READ, None,
 								win32file.OPEN_EXISTING,
@@ -32,7 +32,7 @@ while(simulationStatus != 'STOP'):
                     + 'ELBOW' + ' ' + str(moElbCoord[0]) + ' ' + str(moElbCoord[1]) + ' ' + str(moElbCoord[2]) + ' '
                     + 'SHOULDER' + ' ' + str(moShoCoord[0]) + ' ' + str(moShoCoord[1]) + ' ' + str(moShoCoord[2]) + ' '
                     + 'HEAD' + ' ' + str(moHeadCoord[0]) + ' ' + str(moHeadCoord[1]) + ' ' + str(moHeadCoord[2]))
-    ##                
+    ##
     print "read mother coordinates"
     cmds.select('baby_wrist')
     babyWriCoord = cmds.xform(query = True, worldSpace = True, translation = True)
@@ -44,10 +44,10 @@ while(simulationStatus != 'STOP'):
     babyHeadCoord = cmds.xform(query = True, worldSpace = True, translation = True)
     messageToSend = (messageToSend + ' ' + 'BABY_COORDINATES' + ' ' + 'WRIST' + ' ' + str(babyWriCoord[0]) + ' ' + str(babyWriCoord[1]) + ' ' + str(babyWriCoord[2]) + ' '
                     + 'ELBOW' + ' ' + str(babyElbCoord[0]) + ' ' + str(babyElbCoord[1]) + ' ' + str(babyElbCoord[2]) + ' '
-                    + 'SHOULDER' + ' ' + str(babyShoCoord[0]) + ' ' + str(babyShoCoord[1]) + ' ' + str(babyShoCoord[2]) + ' ' 
+                    + 'SHOULDER' + ' ' + str(babyShoCoord[0]) + ' ' + str(babyShoCoord[1]) + ' ' + str(babyShoCoord[2]) + ' '
                     + 'HEAD' + ' ' + str(babyHeadCoord[0]) + ' ' + str(babyHeadCoord[1]) + ' ' + str(babyHeadCoord[2]))
     print "read baby coordinates"
-    ##							
+    ##
     win32file.WriteFile(babyBrain, bytearray(messageToSend, 'utf-8'))
     print "sent message to baby"
     win32file.WriteFile(mommyBrain, bytearray(messageToSend, 'utf-8'))
@@ -59,6 +59,7 @@ while(simulationStatus != 'STOP'):
     print "read message from mommy ", motherMessage
     bMessAsList = babyMessage[1].split(' ')
     mMessAsList = motherMessage[1].split(' ')
+    print "mMessAsList: " + str(mMessAsList)
     ##
     bMessType = bMessAsList[0]
     mMessType = mMessAsList[0]
@@ -68,16 +69,27 @@ while(simulationStatus != 'STOP'):
         print "starting baby simulation"
     elif(bMessType == 'INIT'):
         print "baby init"
-    elif(bMessType == 'MOVE_ARM'):
+    elif(bMessType == 'REACH'):
         x = float(bMessAsList[1])
         y = float(bMessAsList[2])
         z = float(bMessAsList[3])
         time = float(bMessAsList[4])
         cmds.currentTime(time, edit = True)
-        cmds.select('baby_shoulder')
-        cmds.rotate(x,y,z,relative = True)
+        cmds.select('baby_ikhandle')
+        cmds.move(x,y,z,relative = True)
         cmds.setKeyframe(at = 'rz', t = time)
-        print "moving baby arm"
+        print "baby reaching"
+    elif(bMessType == 'RESET_ARM'):
+        x = float(bMessAsList[1])
+        y = float(bMessAsList[2])
+        z = float(bMessAsList[3])
+        time = float(bMessAsList[4])
+        cmds.currentTime(time, edit = True)
+        cmds.select('baby_ikhandle')
+        cmds.move(x,y,z,relative = True)
+        cmds.setKeyframe(at = 'rz', t = time)
+        print " baby pulling"
+        print "reset_MessageToSend"
     elif(bMessType == 'WALK'):
         x = float(bMessAsList[1])
         y = float(bMessAsList[2])
@@ -97,19 +109,26 @@ while(simulationStatus != 'STOP'):
     elif(mMessType == 'INIT'):
         cmds.file('Test Script.mb',o=True,f=True)
         print "init scene"
-    elif(mMessType == 'MOVE_ARM'):
-        #x = float(mMessAsList[1])
-        #y = float(mMessAsList[2])
-        #z = float(mMessAsList[3])
+    elif(mMessType == 'RESPOND'):
+        x1 = float(mMessAsList[1])
+        y1 = float(mMessAsList[2])
+        z1 = float(mMessAsList[3])
         time = float(mMessAsList[4])
         cmds.currentTime(time, edit = True)
-        cmds.select('mother_shoulder')
-        cmds.rotate(0,0,-2,relative = True)
-        cmds.setKeyframe(at = 'rz', t = time)
-        print "mother moving arm"    
+        cmds.select('mother_head')
+        cmds.move(x1,y1,z1,worldSpace = True)
+        #
+        x2 = float(mMessAsList[5])
+        y2 = float(mMessAsList[6])
+        z2 = float(mMessAsList[7])
+        cmds.select('mother_ikhandle')
+        cmds.move(x2,y2,z2,relative = True)
+        #
+        cmds.setKeyframe(at = 'tx', t = time)
+        print "mother moving"
     elif(mMessType == 'STOP'):
          mommySimulationStatus = 'STOP'
-    ## 
+    ##
     if(babySimulationStatus == 'START' or mommySimulationStatus == 'START'):
          simulationStatus = 'RUNNING'
     elif(babySimulationStatus == 'STOP' and mommySimulationStatus == 'STOP'):
