@@ -22,6 +22,7 @@ p = win32pipe.CreateNamedPipe( r'\\.\pipe\BabyBrainPipe',
 win32pipe.ConnectNamedPipe(p, None)
 simulationTime = 0
 numEpisodes = 0
+babyReachWeight = float(1)
 
 while(numEpisodes < 9):
     numEpisodes = numEpisodes + 1
@@ -29,15 +30,11 @@ while(numEpisodes < 9):
     runEpisode = 1
     flag = True
     episodeTime = 0
+    babyFile = open('babyTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
     ##########
     timer2 = 0
     timer3 = 0
     ##########
-    ###tmpStr = 'babyTrajectory_Episode'+str(tmp)+'.txt'
-    ###babyFile = open(tmpStr, 'w')
-    babyFile = open('babyTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
-
-    ##
     while(runEpisode == 1):
         ## Reset / Update
         episodeTime = episodeTime + 1
@@ -80,29 +77,20 @@ while(numEpisodes < 9):
                 babyEpisodeStatus = 'REACH'
                 babyReachTarget = motherWrist
                 baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
-
-        ######################
-        # (i) should learn truncation
-        # (ii) does he effectively 'terminate' action if mother responds? (confirm)
-        # (iii) pullTarget / pullCount obsolete?
         elif(babyEpisodeStatus == 'REACH'):
             print "BABY REACH"
-            #reach until either make target, or timer1 greater than threshold (30), or mother responds
             if(flag == True) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 babyWrist = np.array(babyWrist)
                 babyReachTarget = np.array(babyReachTarget)
-                babyReachCoords = np.array(babyReachTarget - babyWrist)
+                babyReachCoords = np.array(babyReachTarget - babyWrist) * babyReachWeight
                 messageToSend = 'REACH' + ' ' + str(babyReachCoords[0] / 10) + ' ' + str(babyReachCoords[1] /10) + ' ' + str(babyReachCoords[2] /10) + ' ' + str(simulationTime)
                 # child knows when mother starts to respond / move arm
                 if(abs(sum(motherWrist) - sum(moWristInit)) > 0.2):
                     flag = False
+                    babyReachWeight = float(babyReachWeight * 0.9)
             else:
                 babyEpisodeStatus = 'RESET_ARM'
                 messageToSend = 'DO_NOTHING'
-                pullTarget = 8
-                babyPullCount = 0
-        ########################
-
         elif(babyEpisodeStatus == 'RESET_ARM'):
             print "BABY RESET_ARM"
             timer2 = timer2 + 1
