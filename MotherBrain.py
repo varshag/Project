@@ -5,14 +5,8 @@ import numpy as np
 import matplotlib.pyplot as pyp
 import time
 import pickle
-#import trainRNN as tn
-#NOTE: new/improved parsing/training not working embedded here, only stand-alone...
+
 print "Starting Mommy Brain Simulation"
-#net = uf.rnnTrain()
-#net = tn.trainNet()
-fileObj = open('netFile.txt','r')
-net = pickle.load(fileObj)
-print "Network Loaded"
 
 ## Set global variables for initialization and checking
 MOTHER_INITIAL_POSITION = [6.272, 12.511, 8.828]
@@ -26,22 +20,26 @@ p = win32pipe.CreateNamedPipe( r'\\.\pipe\MommyBrainPipe',
 	1, 65536, 65536, 30000000, None )
 
 win32pipe.ConnectNamedPipe(p, None)
-##
 simulationTime = 0
-##
-motherWeights = np.array([1,1,1])
-##
 numEpisodes = 0
-while(numEpisodes < 2):
+##
+fileObj = open('netFile.txt','r')
+net = pickle.load(fileObj)
+print "Network Loaded"
+motherWeights = np.array([1,1,1])
+
+while(numEpisodes < 9):
     numEpisodes = numEpisodes + 1
     motherEpisodeStatus = 'TO_START'
     runEpisode = 1
     flag = 1
+    episodeTime = 0
+    ##
+    ##########
     timer1 = 0
     timer2 = 0
     timer3 = 0
-    episodeTime = 0
-    ##
+    ##########
     rnnActivity = np.array([0,0,0])
     rnnActivityAUX = np.array([0,0,0])
     correction = np.array([0,0,0])
@@ -64,7 +62,6 @@ while(numEpisodes < 2):
         babyShoulder = []
         babyElbow = []
         babyHead = []
-
         ## Receive / Parse message
         animMessage = win32file.ReadFile(p, 4096)[1]
         uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
@@ -74,22 +71,25 @@ while(numEpisodes < 2):
         if(motherEpisodeStatus == 'TO_START'):
             messageToSend = 'INIT ' + str(MOTHER_INITIAL_POSITION[0]) + ' ' + str(MOTHER_INITIAL_POSITION[1]) + ' ' + str(MOTHER_INITIAL_POSITION[2]) + ' ' + str(simulationTime)
             motherEpisodeStatus = 'INITIALIZED'
+            print "Mother TO_START"
 
         elif(motherEpisodeStatus == 'INITIALIZED'):
             messageToSend = 'DO_NOTHING'
             motherEpisodeStatus = 'WATCHING'
-            #
             babyReachTarget = motherWrist
-            #
+            print "Mother INITIALIZED"
 
+        ########################
+        # (i) is var timer1 obsolete?
+        # (ii) below 'if': but what about 'gesture_threshold'? need be more flexible
         elif(motherEpisodeStatus == 'WATCHING'):
-            if(motherHead[0] - babyHead[0] > REACH_THRESHOLD): ###FIX
-                print "mother watching"
+            print "MOTHER WATCHING"
+            if(motherHead[0] - babyHead[0] > REACH_THRESHOLD): 
+                print "MOTHER REACH_THRESHOLD"
             else:
                 timer1 = timer1 + 1
                 if(flag == 1):
                     correction = np.array([0,0,0]) - babyWrist
-                    print "JUST ONCE"
                     flag = 0
                     baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
                 else:
@@ -102,42 +102,40 @@ while(numEpisodes < 2):
                     intActivity = tmp + intActivity
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
-                    print "intActivity"
-
             ## To tell mother when to respond
-            #if(timer1 < 40 and intActivity[0] < 40)
             if(timer1 < 50 and intActivity[0] < 50) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
-                print "DO_NOTHING -- if"
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'RESPOND'
                 #pyp.plot(intActivity)
                 #pyp.show()
-                print "DO_NOTHING -- else"
+        ##########################
 
-        # imposes a reach 'response' for 20 ts, then waits to end
+        ##########################
+        # mother response should be more flexible: arm shouldn't be pulled...
+        # if moving based on recognition -- should just 'walk' in that case
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
-            print "respond"
+            print "MOTHER RESPOND"
             if(timer2 < 20):
-                #
                 motherPullResponse = np.array(baWristInit - motherWrist)
                 messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
-                #
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
+        ##########################
+                
         elif(motherEpisodeStatus == 'END'):
-            # wait until both stop moving, then end episode
+            print "MOTHER END"
             messageToSend = 'DO_NOTHING'
             timer3 = timer3 +1
             if(timer3 > 30):
                 runEpisode = 0
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
-    if(numEpisodes < 5):
-            #pyp.plot(rnnActivityAUX)
-            #pyp.show()
+    if(numEpisodes < 9):
+            pyp.plot(rnnActivityAUX)
+            pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
             motherFile.close()
             #tmpMotherFile.close()
