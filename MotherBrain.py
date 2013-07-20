@@ -111,6 +111,7 @@ while(numEpisodes < 9):
                 #pyp.show()
                 if(intActivity[0] >= 10):
                     motherIntFlag = 1
+                    baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
         ##########################
 
         ##########################
@@ -120,10 +121,18 @@ while(numEpisodes < 9):
             print "MOTHER RESPOND"
             if(timer2 < 20):
                 if(motherIntFlag == 1):
-                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(-0.2) + ' ' + str(0) + ' ' + str(0)
+                    motherRecResponse = np.array(baShoulderInit - motherWrist)
+                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherRecResponse[0] /5) + ' ' + str(motherRecResponse[1] /5) + ' ' + str(motherRecResponse[2] /5)
                 else:
                     motherPullResponse = np.array(baWristInit - motherWrist)
                     messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
+                    # below, hacky way of 'haptic' (touch) feedback
+                    if(timer2 == 10 and numEpisodes == 2):
+                        motherIntFlag = 1
+                        baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
+                    elif(timer2 == 5 and numEpisodes == 3):
+                        motherIntFlag = 1
+                        baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
