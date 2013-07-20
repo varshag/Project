@@ -22,7 +22,7 @@ p = win32pipe.CreateNamedPipe( r'\\.\pipe\MommyBrainPipe',
 win32pipe.ConnectNamedPipe(p, None)
 simulationTime = 0
 numEpisodes = 0
-##
+
 fileObj = open('netFile.txt','r')
 net = pickle.load(fileObj)
 print "Network Loaded"
@@ -35,21 +35,16 @@ while(numEpisodes < 9):
     episodeTime = 0
     motherRNNFlag = 1
     motherIntFlag = 0
-    ##
+    motherFile = open('motherTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
     ##########
     timer2 = 0
     timer3 = 0
-    ##########
     rnnActivity = np.array([0,0,0])
     rnnActivityAUX = np.array([0,0,0])
     correction = np.array([0,0,0])
     net.reset()
     intActivity = np.array([0,0,0])
-    ###tmpStr = 'motherTrajectory_Episode'+str(tmp)+'.txt'
-    ###motherFile = open(tmpStr, 'w')
-    motherFile = open('motherTrajectory_Episode' + str(numEpisodes) + '.txt', 'w')
-
-    ##
+    ##########
     while(runEpisode == 1):
         ## Reset / Update
         episodeTime = episodeTime + 1
@@ -78,8 +73,6 @@ while(numEpisodes < 9):
             motherEpisodeStatus = 'WATCHING'
             babyReachTarget = motherWrist
             print "Mother INITIALIZED"
-
-        ########################
         # (i) below 'if': but what about 'gesture_threshold'? need be more flexible
         elif(motherEpisodeStatus == 'WATCHING'):
             print "MOTHER WATCHING"
@@ -112,10 +105,6 @@ while(numEpisodes < 9):
                 if(intActivity[0] >= 10):
                     motherIntFlag = 1
                     baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
-        ##########################
-
-        ##########################
-        # change so if intActivity crosses theshold, different anim commands get sent
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
             print "MOTHER RESPOND"
@@ -136,8 +125,6 @@ while(numEpisodes < 9):
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'END'
-        ##########################
-
         elif(motherEpisodeStatus == 'END'):
             print "MOTHER END"
             messageToSend = 'DO_NOTHING'
@@ -150,14 +137,12 @@ while(numEpisodes < 9):
             #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
             motherFile.close()
-            #tmpMotherFile.close()
 
 ## End program / pipes
 #uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 #uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
 #motherFile.close()
-#tmpMotherFile.close()
 
 #pyp.plot(rnnActivityAUX)
 #pyp.show()
