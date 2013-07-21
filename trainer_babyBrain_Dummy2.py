@@ -43,8 +43,8 @@ while(runSimulation == 1):
     elif (simulationStatus == 'INITIALIZED'):
         babyReachTarget = motherElbow
         babyReachTarget = np.array(babyReachTarget)
-        babyReachTarget[1] = babyReachTarget[1] - 2
-        babyReachTarget[0] = babyReachTarget[0] - 2
+        babyReachTarget[1] = babyReachTarget[1] - 4
+        babyReachTarget[0] = babyReachTarget[0] - 4
         messageToSend = 'DO_NOTHING'
         simulationStatus = 'REACH'
     elif(simulationStatus == 'REACH'):
