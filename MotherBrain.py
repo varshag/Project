@@ -131,14 +131,17 @@ while(numEpisodes < 9):
             timer3 = timer3 +1
             if(timer3 > 30):
                 runEpisode = 0
+                motherFile.close()
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
     if(numEpisodes < 9):
             #pyp.plot(rnnActivityAUX)
             #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
-            motherFile.close()
+           # motherFile.close()
 
 ## End program / pipes
+animMessage = win32file.ReadFile(p, 4096)[1]
+print("last co-ordinates received")
 #uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 #uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
