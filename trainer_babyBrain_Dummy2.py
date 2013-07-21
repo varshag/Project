@@ -1,5 +1,6 @@
 import win32pipe, win32file, time, operator
 import UtilityFunctions as uf
+import numpy as np
 
 print "Starting Training -- Dummy Action 2"
 MOTHER_INITIAL_POSITION = [6.271829, 12.511145, 8.82793]
@@ -40,13 +41,18 @@ while(runSimulation == 1):
         simulationStatus = 'INITIALIZED'
         print "Initialized baby to initial position"
     elif (simulationStatus == 'INITIALIZED'):
-        babyReachTarget = motherWrist
+        babyReachTarget = motherElbow
+        babyReachTarget = np.array(babyReachTarget)
+        babyReachTarget[1] = babyReachTarget[1] - 2
+        babyReachTarget[0] = babyReachTarget[0] - 2
         messageToSend = 'DO_NOTHING'
         simulationStatus = 'REACH'
     elif(simulationStatus == 'REACH'):
         if episodeTime < 30:
-            # dummy action: from "[str:0,0,2]" to "[str:0,-2,0]" to "str[2,0,0]"
-            messageToSend = 'MOVE' + ' ' + str(2) + ' ' + str(0) + ' ' + str(0) + ' ' + str(episodeTime)
+            babyWrist = np.array(babyWrist)
+            babyReachTarget = np.array(babyReachTarget)
+            babyReachCoords = np.array(babyReachTarget - babyWrist)
+            messageToSend = 'MOVE' + ' ' + str(babyReachCoords[0] /10) + ' ' + str(babyReachCoords[1] /10) + ' ' + str(babyReachCoords[2] /10) + ' ' + str(episodeTime)
         else:
             simulationStatus = 'TO_START'
             messageToSend = 'DO_NOTHING'
