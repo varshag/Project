@@ -23,6 +23,12 @@ win32pipe.ConnectNamedPipe(p, None)
 simulationTime = 0
 numEpisodes = 0
 babyReachWeight = float(1)
+#
+learnedVirtualTarget = np.array([0,0,0])
+babyVirtualTarget = np.array([0,0,0])
+targetCoords1 = np.array([0,0,0])
+targetCoords2 = np.array([0,0,0])
+#
 
 while(numEpisodes < 9):
     numEpisodes = numEpisodes + 1
@@ -77,20 +83,33 @@ while(numEpisodes < 9):
                 babyEpisodeStatus = 'REACH'
                 babyReachTarget = motherWrist
                 baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
+
         elif(babyEpisodeStatus == 'REACH'):
             print "BABY REACH"
             if(flag == True) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 babyWrist = np.array(babyWrist)
                 babyReachTarget = np.array(babyReachTarget)
                 babyReachCoords = np.array(babyReachTarget - babyWrist) * babyReachWeight
-                messageToSend = 'REACH' + ' ' + str(babyReachCoords[0] / 10) + ' ' + str(babyReachCoords[1] /10) + ' ' + str(babyReachCoords[2] /10) + ' ' + str(simulationTime)
+                #######
+                if(numEpisodes == 1):
+                    babyVirtualTarget = babyReachTarget
+                    learnedVirtualTarget = babyVirtualTarget
+                else:
+                    babyVirtualTarget = learnedVirtualTarget
+                babyVirtualTarget = np.array(babyVirtualTarget)
+                babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight
+                babyMotorError = (babyReachCoords + babyGestCoords) / 2
+                messageToSend = 'REACH' + ' ' + str(babyMotorError[0] / 10) + ' ' + str(babyMotorError[1] /10) + ' ' + str(babyMotorError[2] /10) + ' ' + str(simulationTime)
+                #######
                 # child knows when mother starts to respond / move arm
                 if(abs(sum(motherWrist) - sum(moWristInit)) > 0.2):
                     flag = False
                     babyReachWeight = float(babyReachWeight * 0.9)
+                    learnedVirtualTarget = babyWrist
             else:
                 babyEpisodeStatus = 'RESET_ARM'
                 messageToSend = 'DO_NOTHING'
+
         elif(babyEpisodeStatus == 'RESET_ARM'):
             print "BABY RESET_ARM"
             timer2 = timer2 + 1
