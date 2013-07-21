@@ -53,16 +53,20 @@ while(simulationStatus != 'STOP'):
                     + 'SHOULDER' + ' ' + str(babyShoCoord[0]) + ' ' + str(babyShoCoord[1]) + ' ' + str(babyShoCoord[2]) + ' '
                     + 'HEAD' + ' ' + str(babyHeadCoord[0]) + ' ' + str(babyHeadCoord[1]) + ' ' + str(babyHeadCoord[2]))
     print "read baby coordinates"
-
-    win32file.WriteFile(babyBrain, bytearray(messageToSend, 'utf-8'))
-    print "sent message to baby"
-    win32file.WriteFile(mommyBrain, bytearray(messageToSend, 'utf-8'))
-    print "sent message to mommy"
-
-    babyMessage = win32file.ReadFile(babyBrain, 16000)
-    print "read message from baby ", babyMessage
-    motherMessage = win32file.ReadFile(mommyBrain, 16000)
-    print "read message from mommy ", motherMessage
+    
+    if(babySimulationStatus != 'STOP'):
+        win32file.WriteFile(babyBrain, bytearray(messageToSend, 'utf-8'))
+        print "sent message to baby"
+    if(mommySimulationStatus != 'STOP'):
+        win32file.WriteFile(mommyBrain, bytearray(messageToSend, 'utf-8'))
+        print "sent message to mommy"
+    
+    if(babySimulationStatus != 'STOP'):
+        babyMessage = win32file.ReadFile(babyBrain, 16000)
+        print "read message from baby ", babyMessage
+    if(mommySimulationStatus != 'STOP'):
+        motherMessage = win32file.ReadFile(mommyBrain, 16000)
+        print "read message from mommy ", motherMessage
     bMessAsList = babyMessage[1].split(' ')
     mMessAsList = motherMessage[1].split(' ')
 

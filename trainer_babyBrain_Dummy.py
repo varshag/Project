@@ -6,7 +6,7 @@ MOTHER_INITIAL_POSITION = [6.271829, 12.511145, 8.82793]
 BABY_INITIAL_POSITION = [-8.654732, 7.842551, 7.813142]
 REACH_THRESHOLD = 5
 
-p = win32pipe.CreateNamedPipe( r'\\.\pipe\BabyBrainPipe', 
+p = win32pipe.CreateNamedPipe( r'\\.\pipe\BabyBrainPipe',
 	win32pipe.PIPE_ACCESS_DUPLEX,
 	win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_WAIT,
 	1, 65536, 65536, 30000000, None )
@@ -50,10 +50,11 @@ while(runSimulation == 1):
         else:
             simulationStatus = 'TO_START'
             messageToSend = 'DO_NOTHING'
-            runSimulation = 0           
-            
+            runSimulation = 0
+
     win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
 
+animMessage = win32file.ReadFile(p, 4096)[1]
 uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 uf.writeReceivedCoordinatesToFile(babyFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, episodeTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))

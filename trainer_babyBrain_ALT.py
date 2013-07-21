@@ -59,6 +59,7 @@ while(runSimulation == 1):
 
     win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
 
+animMessage = win32file.ReadFile(p, 4096)[1]
 uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 uf.writeReceivedCoordinatesToFile(babyFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, episodeTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
