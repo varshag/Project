@@ -45,6 +45,8 @@ while(numEpisodes < 9):
     net.reset()
     intActivity = np.array([0,0,0])
     prevHead = [0,0,0]
+    print "NEW_EPISODE: " + str(numEpisodes)
+    print "MotherFlag: " + str(motherRNNFlag)
     ##########
     while(runEpisode == 1):
         ## Reset / Update
@@ -58,30 +60,45 @@ while(numEpisodes < 9):
         babyShoulder = []
         babyElbow = []
         babyHead = []
+
         ## Receive / Parse message
         animMessage = win32file.ReadFile(p, 4096)[1]
         uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
         uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 
-        # Manages decision
+        ## Manages decision
         if(motherEpisodeStatus == 'TO_START'):
             messageToSend = 'INIT ' + str(MOTHER_INITIAL_POSITION[0]) + ' ' + str(MOTHER_INITIAL_POSITION[1]) + ' ' + str(MOTHER_INITIAL_POSITION[2]) + ' ' + str(simulationTime)
             motherEpisodeStatus = 'INITIALIZED'
             print "Mother TO_START"
+
         elif(motherEpisodeStatus == 'INITIALIZED'):
             messageToSend = 'DO_NOTHING'
             motherEpisodeStatus = 'WATCHING'
             babyReachTarget = motherWrist
             print "Mother INITIALIZED"
+            print "mother_flag: " + str(motherRNNFlag)
+        # (i) below 'if': but what about 'gesture_threshold'? need be more flexible
         elif(motherEpisodeStatus == 'WATCHING'):
             diffHead = map(operator.sub, babyHead, prevHead)
+            print motherHead[0], babyHead[0], REACH_THRESHOLD
+            print diffHead, babyHead, prevHead
+            print "MOTHER WATCHING"
+            #if(motherHead[0] - babyHead[0] > REACH_THRESHOLD):
             if(diffHead[0] != 0 or diffHead[1] != 0 or diffHead[2] != 0):
                 prevHead = babyHead
+                print "STILL_MOVING"
+                print "mom_flag: " + str(motherRNNFlag)
             elif(motherHead[0] - babyHead[0] <= GESTURE_THRESHOLD):
+                print "else not diffhead"
+                print "motherRNNFLAG: " + str(motherRNNFlag)
+                print "MOTHER_EP: " + str(numEpisodes)
                 if(motherRNNFlag == 1):
                     motherRNNFlag = 0
                     correction = np.array([0,0,0]) - babyWrist
                     baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
+                    print "MOTHER_CORRECTION: " + str(correction)
+                    print "baWristInit: " + str(baWristInit)
                 else:
                     filteredInput = uf.rnnFilter(babyWrist,correction)
                     rnnActivity = net.activate(filteredInput)
@@ -92,7 +109,8 @@ while(numEpisodes < 9):
                     intActivity = compInput + intActivity
                     #pyp.plot(rnnActivityAUX)
                     #pyp.show()
-            # To tell mother when to respond
+                    print "MOTHER RNN: " + str(rnnActivity)
+            ## To tell mother when to respond
             if(intActivity[0] < 10) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
             else:
@@ -103,6 +121,7 @@ while(numEpisodes < 9):
                 if(intActivity[0] >= 10):
                     motherIntFlag = 1
                     baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
+                    print "baShoulderInit: " + str(baShoulderInit)
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
             print "MOTHER RESPOND"
@@ -132,15 +151,12 @@ while(numEpisodes < 9):
                 motherFile.close()
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
     if(numEpisodes < 9):
-            #pyp.plot(rnnActivityAUX)
-            #pyp.show()
+            pyp.plot(rnnActivityAUX)
+            pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
-            #motherFile.close()
 
 ## End program / pipes
-animMessage = win32file.ReadFile(p, 4096)[1]
-print("last co-ordinates received")
-#uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
+uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 #uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
 #motherFile.close()
