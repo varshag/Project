@@ -1,7 +1,7 @@
 import win32pipe, win32file, time, operator
 import UtilityFunctions as uf
 
-print "Starting Training -- Dummy Action"
+print "Starting Training -- Real Action"
 MOTHER_INITIAL_POSITION = [6.271829, 12.511145, 8.82793]
 BABY_INITIAL_POSITION = [-8.654732, 7.842551, 7.813142]
 REACH_THRESHOLD = 5
@@ -53,6 +53,7 @@ while(runSimulation == 1):
 
     win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
 
+animMessage = win32file.ReadFile(p, 4096)[1]
 uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
 uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, episodeTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
