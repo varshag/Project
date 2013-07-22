@@ -24,7 +24,7 @@ simulationTime = 0
 numEpisodes = 0
 babyReachWeight = np.array([0.5,0.5])
 #
-learnedVirtualTarget = np.array([0,0,0])
+babyShoulderBias = np.array([0,0,0])
 babyVirtualTarget = np.array([0,0,0])
 targetCoords1 = np.array([0,0,0])
 targetCoords2 = np.array([0,0,0])
@@ -100,44 +100,31 @@ while(numEpisodes < 9):
                 babyReachTarget = np.array(babyReachTarget)
                 babyReachCoords = np.array(babyReachTarget - babyWrist) * babyReachWeight[0]
                 if(numEpisodes == 1):
-                    babyVirtualTarget = babyReachTarget
-                    learnedVirtualTarget = babyVirtualTarget
-
-                    ##
+                    #babyVirtualTarget = babyReachTarget
+                    #learnedVirtualTarget = babyVirtualTarget
                     #
-                    tmpShoulderBias = np.array(babyReachTarget - babyShoulder)
+                    babyShoulderBias = uf.setShoulderBias(babyShoulderBias,babyReachTarget,babyShoulder,babyWrist,numEpisodes,gestureFlag)
                     #
-                    ##
-
-
-                else:
-                    babyVirtualTarget = learnedVirtualTarget
-                babyVirtualTarget = np.array(babyVirtualTarget)
-                babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
-                babyMotorError = (babyReachCoords + babyGestCoords)
-
-                ##
-                #
-                #babyVirtualTarget = uf.virtualMotorCorrection(babyShoulder,tmpShoulderBias)
+                #else:
+                    #babyVirtualTarget = learnedVirtualTarget
+                #babyVirtualTarget = np.array(babyVirtualTarget)
                 #babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
                 #babyMotorError = (babyReachCoords + babyGestCoords)
                 #
-                ##
-
+                babyVirtualTarget = uf.virtualMotorCorrection(babyShoulder,babyShoulderBias)
+                babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
+                babyMotorError = (babyReachCoords + babyGestCoords)
+                #
                 messageToSend = 'REACH' + ' ' + str(babyMotorError[0] / 10) + ' ' + str(babyMotorError[1] /10) + ' ' + str(babyMotorError[2] /10) + ' ' + str(simulationTime)
                 # child knows when mother starts to respond / move arm
                 if(abs(sum(motherWrist) - sum(moWristInit)) > 0.2):
                     flag = False
                     babyReachWeight[1] = babyReachWeight[1] + 0.5
                     babyReachWeight = babyReachWeight / np.sum(babyReachWeight)
-                    learnedVirtualTarget = babyWrist
-
-                    ##
+                    #learnedVirtualTarget = babyWrist
                     #
-                    tmpShoulderBias = uf.shoulderCoordTrans(babyWrist,babyShoulder)
+                    babyShoulderBias = uf.setShoulderBias(babyShoulderBias,babyReachTarget,babyShoulder,babyWrist,numEpisodes,gestureFlag)
                     #
-                    ##
-
                     if(babyReachWeight[1] > 0.8):
                         gestureFlag = True
             else:
