@@ -117,13 +117,18 @@ def compInt(input):
 
 ##
 #
-def shoulderCoordTrans(babyWrist,babyShoulder):
+def virtualMotorCorrection(babyShoulder,babyShoulderBias):
     import numpy as np
-    tmpShoulderBias = np.array(babyWrist - babyShoulder)
-    return tmpShoulderBias
-
-def virtualMotorCorrection(babyShoulder,tmpShoulderBias):
-    import numpy as np
-    virtualTarget = np.array(babyShoulder + tmpShoulderBias)
+    virtualTarget = np.array(babyShoulder + babyShoulderBias)
     return virtualTarget
 
+def setShoulderBias(babyShoulderBias,babyReachTarget,babyShoulder,babyWrist,numEpisodes,gestureFlag):
+    import numpy as np
+    if(numEpisodes == 1):
+        babyShoulderBias = np.array(babyReachTarget - babyShoulder)
+    elif(gestureFlag == False):
+        babyShoulderBias = np.array(babyWrist - babyShoulder)
+    elif(gestureFlag == True):
+        # no more 'tuning' of target once a gesture is learned...
+        babyShoulderBias = babyShoulderBias
+    return babyShoulderBias
