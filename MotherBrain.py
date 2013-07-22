@@ -90,9 +90,8 @@ while(numEpisodes < 9):
                     rawIntInput = tanhRNN * motherWeights
                     compInput = uf.compInt(rawIntInput)
                     intActivity = compInput + intActivity
-                    #if(numEpisodes == 9):
-                        #pyp.plot(rnnActivityAUX)
-                        #pyp.show()
+                    #pyp.plot(rnnActivityAUX)
+                    #pyp.show()
             # To tell mother when to respond
             if(intActivity[0] < 10) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
@@ -101,7 +100,11 @@ while(numEpisodes < 9):
                 motherEpisodeStatus = 'RESPOND'
                 #pyp.plot(intActivity)
                 #pyp.show()
-                if(intActivity[0] >= 10):
+                ##
+                #
+                if(intActivity[0] >= 10): # NOTE: any larger value, mother does not reach towards shoulder based on RNN recognition...
+                #
+                ##
                     motherIntFlag = 1
                     baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
         elif(motherEpisodeStatus == 'RESPOND'):
@@ -136,17 +139,11 @@ while(numEpisodes < 9):
             #pyp.plot(rnnActivityAUX)
             #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
-            #motherFile.close()
 
 ## End program / pipes
 animMessage = win32file.ReadFile(p, 4096)[1]
-print("last co-ordinates received")
-#uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
-#uf.writeReceivedCoordinatesToFile(motherFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
-#motherFile.close()
-
 #pyp.plot(rnnActivityAUX)
 #pyp.show()
-
+print("Last message received")
 win32file.CloseHandle(p)

@@ -149,16 +149,10 @@ while(numEpisodes < 9):
                 babyFile.close()
 
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
-  #  if(numEpisodes < 9):
-   #         babyFile.close()
 
 ##
 animMessage = win32file.ReadFile(p, 4096)[1]
-print("Last message received")
-#uf.parseMessage(animMessage, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead)
-#uf.writeReceivedCoordinatesToFile(babyFile, motherWrist, motherShoulder, motherElbow, motherHead, babyWrist, babyShoulder, babyElbow, babyHead, simulationTime)
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
-#babyFile.close()
-
+print("Last message received")
 win32file.CloseHandle(p)
 
