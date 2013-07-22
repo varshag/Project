@@ -66,6 +66,7 @@ while(numEpisodes < 9):
             messageToSend = 'INIT ' + str(BABY_INITIAL_POSITION[0]) + ' ' + str(BABY_INITIAL_POSITION[1]) + ' ' + str(BABY_INITIAL_POSITION[2]) + ' ' + str(simulationTime)
             babyEpisodeStatus = 'INITIALIZED'
             print "BABY TO_START"
+
         elif(babyEpisodeStatus == 'INITIALIZED'):
             print "BABY INITIALIZED"
             #makes so baby always must walk at least a little
@@ -101,11 +102,28 @@ while(numEpisodes < 9):
                 if(numEpisodes == 1):
                     babyVirtualTarget = babyReachTarget
                     learnedVirtualTarget = babyVirtualTarget
+
+                    ##
+                    #
+                    tmpShoulderBias = np.array(babyReachTarget - babyShoulder)
+                    #
+                    ##
+
+
                 else:
                     babyVirtualTarget = learnedVirtualTarget
                 babyVirtualTarget = np.array(babyVirtualTarget)
                 babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
                 babyMotorError = (babyReachCoords + babyGestCoords)
+
+                ##
+                #
+                #babyVirtualTarget = uf.virtualMotorCorrection(babyShoulder,tmpShoulderBias)
+                #babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
+                #babyMotorError = (babyReachCoords + babyGestCoords)
+                #
+                ##
+
                 messageToSend = 'REACH' + ' ' + str(babyMotorError[0] / 10) + ' ' + str(babyMotorError[1] /10) + ' ' + str(babyMotorError[2] /10) + ' ' + str(simulationTime)
                 # child knows when mother starts to respond / move arm
                 if(abs(sum(motherWrist) - sum(moWristInit)) > 0.2):
@@ -113,6 +131,13 @@ while(numEpisodes < 9):
                     babyReachWeight[1] = babyReachWeight[1] + 0.5
                     babyReachWeight = babyReachWeight / np.sum(babyReachWeight)
                     learnedVirtualTarget = babyWrist
+
+                    ##
+                    #
+                    tmpShoulderBias = uf.shoulderCoordTrans(babyWrist,babyShoulder)
+                    #
+                    ##
+
                     if(babyReachWeight[1] > 0.8):
                         gestureFlag = True
             else:
