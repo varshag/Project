@@ -66,7 +66,6 @@ while(numEpisodes < 9):
             messageToSend = 'INIT ' + str(BABY_INITIAL_POSITION[0]) + ' ' + str(BABY_INITIAL_POSITION[1]) + ' ' + str(BABY_INITIAL_POSITION[2]) + ' ' + str(simulationTime)
             babyEpisodeStatus = 'INITIALIZED'
             print "BABY TO_START"
-
         elif(babyEpisodeStatus == 'INITIALIZED'):
             print "BABY INITIALIZED"
             #makes so baby always must walk at least a little
@@ -77,8 +76,6 @@ while(numEpisodes < 9):
         elif(babyEpisodeStatus == 'WALK'):
             print "BABY WALK"
             # indicates max distance can reach from
-
-            ######
             if(gestureFlag == True):
                 #can gesture, so impose gesture_threshold, not reach_threshold
                 if(motherHead[0] - babyHead[0] > GESTURE_THRESHOLD):
@@ -88,28 +85,19 @@ while(numEpisodes < 9):
                     babyEpisodeStatus = 'REACH'
                     babyReachTarget = motherWrist
                     baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
-            ##
             elif(motherHead[0] - babyHead[0] > REACH_THRESHOLD):
                 messageToSend = 'WALK ' + str(babyHead[0] + 0.2) + ' ' + str(babyHead[1]) + ' ' + str(babyHead[2]) + ' ' + str(simulationTime)
-            #####
-
             else:
                 messageToSend = 'DO_NOTHING'
                 babyEpisodeStatus = 'REACH'
                 babyReachTarget = motherWrist
                 baWristInit = np.array([babyWrist[0],babyWrist[1],babyWrist[2]])
-
-
-
         elif(babyEpisodeStatus == 'REACH'):
             print "BABY REACH"
             if(flag == True) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 babyWrist = np.array(babyWrist)
                 babyReachTarget = np.array(babyReachTarget)
                 babyReachCoords = np.array(babyReachTarget - babyWrist) * babyReachWeight[0]
-
-
-                #######
                 if(numEpisodes == 1):
                     babyVirtualTarget = babyReachTarget
                     learnedVirtualTarget = babyVirtualTarget
@@ -119,7 +107,6 @@ while(numEpisodes < 9):
                 babyGestCoords = np.array(babyVirtualTarget - babyWrist) * babyReachWeight[1]
                 babyMotorError = (babyReachCoords + babyGestCoords)
                 messageToSend = 'REACH' + ' ' + str(babyMotorError[0] / 10) + ' ' + str(babyMotorError[1] /10) + ' ' + str(babyMotorError[2] /10) + ' ' + str(simulationTime)
-                ##
                 # child knows when mother starts to respond / move arm
                 if(abs(sum(motherWrist) - sum(moWristInit)) > 0.2):
                     flag = False
@@ -128,18 +115,13 @@ while(numEpisodes < 9):
                     learnedVirtualTarget = babyWrist
                     if(babyReachWeight[1] > 0.8):
                         gestureFlag = True
-                #######
-
             else:
                 babyEpisodeStatus = 'RESET_ARM'
                 messageToSend = 'DO_NOTHING'
-
-
-
         elif(babyEpisodeStatus == 'RESET_ARM'):
             print "BABY RESET_ARM"
             timer2 = timer2 + 1
-            if(timer2 < 20):
+            if(timer2 < 25):
                 babyPullCoords = np.array(baWristInit - babyWrist)
                 messageToSend = 'RESET_ARM' + ' ' + str(babyPullCoords[0] / 10) + ' ' + str(babyPullCoords[1] /10) + ' ' + str(babyPullCoords[2] /10) + ' ' + str(simulationTime)
             else:
