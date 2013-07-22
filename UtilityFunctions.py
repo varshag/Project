@@ -114,3 +114,16 @@ def compInt(input):
     input[idx] = 0
     input = np.divide(input,s+1)
     return input
+
+##
+#
+def shoulderCoordTrans(babyWrist,babyShoulder):
+    import numpy as np
+    tmpShoulderBias = np.array(babyWrist - babyShoulder)
+    return tmpShoulderBias
+
+def virtualMotorCorrection(babyShoulder,tmpShoulderBias):
+    import numpy as np
+    virtualTarget = np.array(babyShoulder + tmpShoulderBias)
+    return virtualTarget
+
