@@ -120,7 +120,7 @@ while(simulationStatus != 'STOP'):
         time = float(mMessAsList[4])
         cmds.currentTime(time, edit = True)
         cmds.select('mother_head')
-        cmds.move(x1,y1,z1,worldSpace = True)
+        cmds.move(x1,y1,z1,relative = True)
         #
         x2 = float(mMessAsList[5])
         y2 = float(mMessAsList[6])

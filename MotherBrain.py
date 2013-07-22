@@ -90,31 +90,31 @@ while(numEpisodes < 9):
                     rawIntInput = tanhRNN * motherWeights
                     compInput = uf.compInt(rawIntInput)
                     intActivity = compInput + intActivity
-                    if(numEpisodes == 9):
-                        pyp.plot(rnnActivityAUX)
-                        pyp.show()
+                    #if(numEpisodes == 9):
+                        #pyp.plot(rnnActivityAUX)
+                        #pyp.show()
             # To tell mother when to respond
             if(intActivity[0] < 10) and (babyReachTarget[0] - babyWrist[0] > 0.5):
                 messageToSend = 'DO_NOTHING'
             else:
                 messageToSend = 'DO_NOTHING'
                 motherEpisodeStatus = 'RESPOND'
-                pyp.plot(intActivity)
-                pyp.show()
+                #pyp.plot(intActivity)
+                #pyp.show()
                 if(intActivity[0] >= 10):
                     motherIntFlag = 1
                     baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
         elif(motherEpisodeStatus == 'RESPOND'):
             timer2 = timer2 + 1
             print "MOTHER RESPOND"
-            if(timer2 < 20):
+            if(timer2 < 25):
+                motherWalkResponse = np.array((babyHead[0] + 4) - motherHead[0])
                 if(motherIntFlag == 1):
                     motherRecResponse = np.array(baShoulderInit - motherWrist)
-                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherRecResponse[0] /5) + ' ' + str(motherRecResponse[1] /5) + ' ' + str(motherRecResponse[2] /5)
+                    messageToSend = 'RESPOND' + ' ' + str(motherWalkResponse /10) + ' ' + str(0) + ' ' + str(0) + ' ' + str(simulationTime) + ' ' + str(motherRecResponse[0] /5) + ' ' + str(motherRecResponse[1] /5) + ' ' + str(motherRecResponse[2] /5)
                 else:
                     motherPullResponse = np.array(baWristInit - motherWrist)
-                    messageToSend = 'RESPOND' + ' ' + str(motherHead[0] - 0.2) + ' ' + str(motherHead[1]) + ' ' + str(motherHead[2]) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
-                    # below, hacky way of 'haptic' (touch) feedback
+                    messageToSend = 'RESPOND' + ' ' + str(motherWalkResponse /10) + ' ' + str(0) + ' ' + str(0) + ' ' + str(simulationTime) + ' ' + str(motherPullResponse[0] /10) + ' ' + str(motherPullResponse[1] /10) + ' ' + str(motherPullResponse[2] /10)
                     if(timer2 == 10 and numEpisodes == 2):
                         motherIntFlag = 1
                         baShoulderInit = np.array([babyShoulder[0],babyShoulder[1],babyShoulder[2]])
@@ -133,8 +133,8 @@ while(numEpisodes < 9):
                 motherFile.close()
         win32file.WriteFile(p, bytearray(messageToSend, 'utf-8'))
     if(numEpisodes < 9):
-            pyp.plot(rnnActivityAUX)
-            pyp.show()
+            #pyp.plot(rnnActivityAUX)
+            #pyp.show()
             motherWeights = uf.motherLearnWeights(motherWeights)
             #motherFile.close()
 
@@ -146,7 +146,7 @@ print("last co-ordinates received")
 win32file.WriteFile(p, bytearray('STOP', 'utf-8'))
 #motherFile.close()
 
-pyp.plot(rnnActivityAUX)
-pyp.show()
+#pyp.plot(rnnActivityAUX)
+#pyp.show()
 
 win32file.CloseHandle(p)
