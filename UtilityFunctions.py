@@ -97,16 +97,20 @@ def writeReceivedCoordinatesToFile(file, motherWrist, motherShoulder, motherElbo
     return
 
 #filters rnn input by correcting all to 0 at begining of sequence
+# NOTE: for babyWrist (x,y,z) correction only
 def rnnFilter(rawIn,correction):
     filterIn = correction + rawIn
     return filterIn
 
-## IMPROVE
+
+
+#Improve; right now, tuned from behavior...
 def motherLearnWeights(motherWeights):
     motherWeights[0] = motherWeights[0] + 1
     return motherWeights
 
-## REPLACE WITH COMPETITION
+
+#intActivity only gets as input diff between max and second-max...
 def compInt(input):
     import numpy as np
     s = float(input.sum())
@@ -115,13 +119,13 @@ def compInt(input):
     input = np.divide(input,s+1)
     return input
 
-##
-#
+# corrects to shoulder-centered postural learning
 def virtualMotorCorrection(babyShoulder,babyShoulderBias):
     import numpy as np
     virtualTarget = np.array(babyShoulder + babyShoulderBias)
     return virtualTarget
 
+# learns new posture
 def setShoulderBias(babyShoulderBias,babyReachTarget,babyShoulder,babyWrist,numEpisodes,gestureFlag):
     import numpy as np
     if(numEpisodes == 1):
