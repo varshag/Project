@@ -5,23 +5,25 @@ import numpy as np
 import matplotlib.pyplot as pyp
 import time
 import pickle
+import ConfigParser
 
 print "Starting Baby Brain Simulation"
-
+cfg = ConfigParser.ConfigParser()
+cfg.readfp(open('parameters.cfg'))
 ## Set global parameters
-GESTURE_THRESHOLD = 10 # SAME VALUR FOR MOTHER
-REACH_THRESHOLD = 8 # SAME VALUE FOR MOTHER
-paramTimer1 = 25 # SAME VALUE FOR MOTHER; thresholds timer1; used to transition between states reset_arm and end
-paramTimer2 = 12 # SAME VALUE FOR MOTHER; thresholds timer2; used as blank time before new scene file load in animation script
-paramContactThreshold = 0.4 # SAME VALUE FOR MOTHER; if his wrist is within 0.4 units of motherWrist, its 'contact' / 'pull'
-paramEpNum = 10 # SAME VALUE FOR MOTHER; runs 10 episodes
+GESTURE_THRESHOLD = float(cfg.get("common", "GESTURE_THRESHOLD")) # SAME VALUR FOR MOTHER
+REACH_THRESHOLD = float(cfg.get("common", "REACH_THRESHOLD")) # SAME VALUE FOR MOTHER
+paramTimer1 = float(cfg.get("common", "paramTimer1")) # SAME VALUE FOR MOTHER; thresholds timer1; used to transition between states reset_arm and end
+paramTimer2 = float(cfg.get("common", "paramTimer2")) # SAME VALUE FOR MOTHER; thresholds timer2; used as blank time before new scene file load in animation script
+paramContactThreshold = float(cfg.get("common", "paramContactThreshold")) # SAME VALUE FOR MOTHER; if his wrist is within 0.4 units of motherWrist, its 'contact' / 'pull'
+paramEpNum = float(cfg.get("common", "paramEpNum")) # SAME VALUE FOR MOTHER; runs 10 episodes
 #
-paramBabyWalkInc = 0.2 # he walks linearly for now, can be updated; he moves this many units in x-plane every ts
-paramBabyRecThreshold = 0.1 # babys threshold for recognizing mother response; she moves >0.1, he 'knows'
-paramBabyIKReach = 10 # divider before sending motor commands to IK solver; exponential, will want to change...
-paramBabyIKPull = 10 # for now, separate than above, only for flexibility if need be
-paramRWInc = 1 # learning increment
-paramBabyGestThreshold = 0.8 # when he can 'gesture' in future episodes
+paramBabyWalkInc = float(cfg.get("babySpecific", "paramBabyWalkInc")) # he walks linearly for now, can be updated; he moves this many units in x-plane every ts
+paramBabyRecThreshold = float(cfg.get("babySpecific", "paramBabyRecThreshold")) # babys threshold for recognizing mother response; she moves >0.1, he 'knows'
+paramBabyIKReach = float(cfg.get("babySpecific", "paramBabyIKReach")) # divider before sending motor commands to IK solver; exponential, will want to change...
+paramBabyIKPull = float(cfg.get("babySpecific", "paramBabyIKPull")) # for now, separate than above, only for flexibility if need be
+paramRWInc = float(cfg.get("babySpecific", "paramRWInc")) # learning increment
+paramBabyGestThreshold = float(cfg.get("babySpecific", "paramBabyGestThreshold")) # when he can 'gesture' in future episodes
 # ALSO:
 # gestureFlag -- right now, a bool that says whether or not gesture is 'known'; see paramBabyGestThreshold
 # babyRecFlag -- bool that says whether baby 'recognizes' mother response; see paramBabyRecThreshold

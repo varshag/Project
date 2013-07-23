@@ -5,23 +5,25 @@ import numpy as np
 import matplotlib.pyplot as pyp
 import time
 import pickle
+import ConfigParser
 
 print "Starting Mommy Brain Simulation"
-
+cfg = ConfigParser.ConfigParser()
+cfg.readfp(open('parameters.cfg'))
 ## Set global variables for initialization and checking
-GESTURE_THRESHOLD = 10 # SAME VALUR FOR BABY
-REACH_THRESHOLD = 8 # SAME VALUE FOR BABY
-paramTimer1 = 25 # SAME VALUE FOR BABY; thresholds timer1; used to transition between states reset_arm and end
-paramTimer2 = 12 # SAME VALUE FOR BABY; thresholds timer2; used as blank time before new scene file load in animation script
-paramContactThreshold = 0.4 # SAME VALUE FOR BABY; if his wrist is within 0.4 units of motherWrist, its 'contact' / 'pull'
-paramEpNum = 10 # SAME VALUE FOR MOTHER; runs 10 episodes
+GESTURE_THRESHOLD = float(cfg.get("common", "GESTURE_THRESHOLD")) # SAME VALUR FOR BABY
+REACH_THRESHOLD = float(cfg.get("common", "REACH_THRESHOLD")) # SAME VALUE FOR BABY
+paramTimer1 = float(cfg.get("common", "paramTimer1")) # SAME VALUE FOR BABY; thresholds timer1; used to transition between states reset_arm and end
+paramTimer2 = float(cfg.get("common", "paramTimer1")) # SAME VALUE FOR BABY; thresholds timer2; used as blank time before new scene file load in animation script
+paramContactThreshold = float(cfg.get("common", "paramContactThreshold")) # SAME VALUE FOR BABY; if his wrist is within 0.4 units of motherWrist, its 'contact' / 'pull'
+paramEpNum = float(cfg.get("common", "paramEpNum")) # SAME VALUE FOR MOTHER; runs 10 episodes
 #
-paramIntThreshold = 12 # signals at what point RNN-integrator reaches threshold; an 'rnn-mediated response'
-paramIntIncPull = 0.2 # haptic input; inc of increase in intActivity during pulling; note 'during watching' is computed directly from RNN
-paramIKReach1 = 10 # divider before sending motor commands to IK solver; exponential, will want to change...
-paramIKReach2 = 5 # results in quicker than above, for 'mid-pull recognition response' in mother; stylistic only
-paramIKWalk = 13 # divider before sending motor commands to IK solver; exponential, will want to change...
-paramMotherStandDist = 4 # Mother will walk to a point 4 units in front of center of babys head
+paramIntThreshold = float(cfg.get("motherSpecific", "paramMotherIntThreshold")) # signals at what point RNN-integrator reaches threshold; an 'rnn-mediated response'
+paramIntIncPull = float(cfg.get("motherSpecific", "paramMotherIntIncPull")) # haptic input; inc of increase in intActivity during pulling; note 'during watching' is computed directly from RNN
+paramIKReach1 = float(cfg.get("motherSpecific", "paramMotherIKReach1")) # divider before sending motor commands to IK solver; exponential, will want to change...
+paramIKReach2 = float(cfg.get("motherSpecific", "paramMotherIKReach2")) # results in quicker than above, for 'mid-pull recognition response' in mother; stylistic only
+paramIKWalk = float(cfg.get("motherSpecific", "paramMotherIKWalk")) # divider before sending motor commands to IK solver; exponential, will want to change...
+paramMotherStandDist = float(cfg.get("motherSpecific", "paramMotherStandDist")) # Mother will walk to a point 4 units in front of center of babys head
 # ALSO:
 # motherRNNFlag -- involved in initializing mother RNN; all a bit touchy here -- need to turn on the RNN at the right time-step
 # timer1
